@@ -19,7 +19,7 @@ def main():
         ["Full Hello World", "Simple Hello", "About"]
 
         "How do you want to feed the AI model",
-        ["Ask the global system", "Feed a folder", "Feed file/s"]
+        ["Ask the global system", "Feed a folder", "Feed files"]
     )
     
     # Route to the appropriate function
