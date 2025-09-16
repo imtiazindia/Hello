@@ -2,6 +2,13 @@
 import streamlit as st
 from hello_module import hello_world, simple_hello
 
+# Set page configuration FIRST - before any other Streamlit commands
+st.set_page_config(
+    page_title="Hello World App",
+    page_icon="🌍",
+    layout="centered"
+)
+
 def main():
     """Main application entry point"""
     
