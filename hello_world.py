@@ -2,10 +2,10 @@ import streamlit as st
 import datetime
 import time
 
-# Set page configuration
+# Set page configuration - FIXED THE TYPO
 st.set_page_config(
     page_title="Hello World Live Deployment",
-    page_-icon="🌍",
+    page_icon="🌍",  # Changed from page_-icon to page_icon
     layout="centered"
 )
 
