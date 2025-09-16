@@ -34,8 +34,8 @@ def main():
         feed_files()
     
     # You can keep your original app mode logic here if needed
-    if app_mode == "About":
-        show_about()
+    #if app_mode == "About":
+    #    show_about()
 
 def show_about():
     """About page"""
