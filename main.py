@@ -17,6 +17,9 @@ def main():
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
         ["Full Hello World", "Simple Hello", "About"]
+
+        "How do you want to feed the AI model",
+        ["Ask the global system", "Feed a folder", "Feed file/s"]
     )
     
     # Route to the appropriate function
