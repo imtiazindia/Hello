@@ -2,17 +2,18 @@
 import streamlit as st
 import openai
 import os
-from openai import OpenAI
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Initialize OpenAI client
+    # Initialize OpenAI - fixed initialization
     try:
-        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+        # Set API key directly (compatible approach)
+        openai.api_key = st.secrets["OPENAI_API_KEY"]
+        
     except Exception as e:
-        st.error(f"Failed to initialize OpenAI client: {e}")
+        st.error(f"Failed to initialize OpenAI: {e}")
         return
     
     # Query input
@@ -50,7 +51,7 @@ def ask_global_system():
                 with st.spinner("ChatGPT is thinking..."):
                     try:
                         # Call ChatGPT API
-                        response = client.chat.completions.create(
+                        response = openai.ChatCompletion.create(
                             model=model,
                             messages=[
                                 {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
@@ -63,15 +64,15 @@ def ask_global_system():
                         # Get the response
                         chatgpt_response = response.choices[0].message.content
                         
-                        # Store in session state to persist across reruns
+                        # Store in session state
                         st.session_state.chatgpt_response = chatgpt_response
                         st.session_state.last_query = query
                         
-                    except openai.AuthenticationError:
-                        st.error("Invalid API key. Please check your OpenAI API key in the secrets.")
-                    except openai.RateLimitError:
+                    except openai.error.AuthenticationError:
+                        st.error("Invalid API key. Please check your OpenAI API key.")
+                    except openai.error.RateLimitError:
                         st.error("Rate limit exceeded. Please try again later.")
-                    except openai.APIError as e:
+                    except openai.error.APIError as e:
                         st.error(f"OpenAI API error: {e}")
                     except Exception as e:
                         st.error(f"An error occurred: {e}")
@@ -82,6 +83,7 @@ def ask_global_system():
                 del st.session_state.chatgpt_response
             if "last_query" in st.session_state:
                 del st.session_state.last_query
+            st.rerun()
     
     # Display the response
     if "chatgpt_response" in st.session_state:
@@ -93,10 +95,10 @@ def ask_global_system():
             with st.expander("See your original query"):
                 st.write(st.session_state.last_query)
         
-        # Display the response in a nice format
+        # Display the response
         st.write(st.session_state.chatgpt_response)
         
-        # Add copy to clipboard functionality
+        # Copy functionality
         if st.button("Copy Response to Clipboard"):
             st.code(st.session_state.chatgpt_response, language="text")
             st.success("Response copied to clipboard!")
@@ -106,8 +108,8 @@ def ask_global_system():
     st.info("""
     **Features:**
     - Direct integration with OpenAI's ChatGPT API
-    - Multiple model selection (GPT-3.5 Turbo, GPT-4, GPT-4 Turbo)
+    - Multiple model selection
     - Adjustable creativity level
-    - Response persistence across interactions
+    - Response persistence
     - Copy to clipboard functionality
     """)
