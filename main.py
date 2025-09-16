@@ -22,6 +22,14 @@ def main():
         "Choose the app mode",
         ["Full Hello World", "Simple Hello", "About"]
     )
+
+    # Route to the appropriate function
+    if app_mode == "Full Hello World":
+        hello_world()
+    elif app_mode == "Simple Hello":
+        simple_hello()
+    elif app_mode == "About":
+        show_about()
     
     # Second selectbox - feeding method
     feed_method = st.sidebar.selectbox(
