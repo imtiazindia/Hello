@@ -7,9 +7,9 @@ def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Initialize OpenAI - fixed initialization
+    # Initialize OpenAI
     try:
-        # Set API key directly (compatible approach)
+        # Set API key directly
         openai.api_key = st.secrets["OPENAI_API_KEY"]
         
     except Exception as e:
@@ -68,14 +68,15 @@ def ask_global_system():
                         st.session_state.chatgpt_response = chatgpt_response
                         st.session_state.last_query = query
                         
-                    except openai.error.AuthenticationError:
-                        st.error("Invalid API key. Please check your OpenAI API key.")
-                    except openai.error.RateLimitError:
-                        st.error("Rate limit exceeded. Please try again later.")
-                    except openai.error.APIError as e:
-                        st.error(f"OpenAI API error: {e}")
                     except Exception as e:
-                        st.error(f"An error occurred: {e}")
+                        # Generic exception handling that works with all versions
+                        error_msg = str(e)
+                        if "authentication" in error_msg.lower() or "api key" in error_msg.lower():
+                            st.error("Invalid API key. Please check your OpenAI API key in secrets.")
+                        elif "rate limit" in error_msg.lower():
+                            st.error("Rate limit exceeded. Please try again later.")
+                        else:
+                            st.error(f"An error occurred: {error_msg}")
     
     with col2:
         if st.button("Clear Response"):
