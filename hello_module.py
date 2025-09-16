@@ -6,13 +6,8 @@ import time
 def hello_world():
     """Main hello world function with all the components"""
     
-    # Set page configuration
-    st.set_page_config(
-        page_title="Hello World Live Deployment",
-        page_icon="🌍",
-        layout="centered"
-    )
-
+    # REMOVED st.set_page_config() from here
+    
     # Main content
     st.title("Hello World! 🌎")
     st.write("This app is being deployed LIVE as we code!")
@@ -52,5 +47,3 @@ def simple_hello():
     st.title("Simple Hello! 👋")
     st.write("This is the simple version from the module!")
     st.info("Module import is working correctly!")
-
-# You can add more functions here if needed
