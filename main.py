@@ -17,6 +17,7 @@ def main():
     # Sidebar navigation
     st.sidebar.title("AI Model Feeder 🤖")
     
+    ...
     # First selectbox - main app mode
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
@@ -30,7 +31,7 @@ def main():
         simple_hello()
     elif app_mode == "About":
         show_about()
-    
+    ...
     # Second selectbox - feeding method
     feed_method = st.sidebar.selectbox(
         "How do you want to feed the AI model",
