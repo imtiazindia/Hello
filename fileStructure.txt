@@ -1,0 +1,5 @@
+hello-world-streamlit/
+├── main.py              # Main entry point with navigation
+├── hello_module.py      # Contains all hello world functions
+├── requirements.txt     # Dependencies
+└── README.md           # Optional documentation
