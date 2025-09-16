@@ -12,12 +12,14 @@ st.set_page_config(
 def main():
     """Main application entry point"""
     
-    # Add a sidebar for navigation
-    st.sidebar.title("Navigation")
+    ## First selectbox
     app_mode = st.sidebar.selectbox(
         "Choose the app mode",
         ["Full Hello World", "Simple Hello", "About"]
-
+    )
+    
+    # Second selectbox (separate call)
+    feed_method = st.sidebar.selectbox(
         "How do you want to feed the AI model",
         ["Ask the global system", "Feed a folder", "Feed files"]
     )
