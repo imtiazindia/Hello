@@ -1,19 +1,17 @@
 # global_system.py
 import streamlit as st
-import openai
+from openai import OpenAI
 import os
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Initialize OpenAI
+    # Initialize OpenAI client for v1.0.0+
     try:
-        # Set API key directly
-        openai.api_key = st.secrets["OPENAI_API_KEY"]
-        
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
     except Exception as e:
-        st.error(f"Failed to initialize OpenAI: {e}")
+        st.error(f"Failed to initialize OpenAI client: {e}")
         return
     
     # Query input
@@ -50,8 +48,8 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # Call ChatGPT API
-                        response = openai.ChatCompletion.create(
+                        # Call ChatGPT API using new v1.0.0+ syntax
+                        response = client.chat.completions.create(
                             model=model,
                             messages=[
                                 {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
@@ -69,7 +67,6 @@ def ask_global_system():
                         st.session_state.last_query = query
                         
                     except Exception as e:
-                        # Generic exception handling that works with all versions
                         error_msg = str(e)
                         if "authentication" in error_msg.lower() or "api key" in error_msg.lower():
                             st.error("Invalid API key. Please check your OpenAI API key in secrets.")
