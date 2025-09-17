@@ -1,19 +1,29 @@
 # global_system.py
 import streamlit as st
 import openai
-import os
-from openai import OpenAI
-
+from importlib.metadata import version
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Set API key directly without client initialization
+    # Check OpenAI version and handle accordingly
     try:
-        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"]) 
+        openai_version = version('openai')
+        st.sidebar.info(f"OpenAI version: {openai_version}")
+        
+        # For newer versions (1.0.0+)
+        if openai_version.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.')):
+            from openai import OpenAI
+            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+            use_new_api = True
+        # For older versions (0.28 and earlier)
+        else:
+            openai.api_key = st.secrets["OPENAI_API_KEY"]
+            use_new_api = False
+            
     except Exception as e:
-        st.error(f"Failed to set OpenAI API key: {e}")
+        st.error(f"Failed to initialize OpenAI: {e}")
         return
     
     # Query input
@@ -50,19 +60,31 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # Call ChatGPT API using the old compatible method
-                        response = client.ChatCompletion.create(
-                            model=model,
-                            messages=[
-                                {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
-                                {"role": "user", "content": query}
-                            ],
-                            temperature=temperature,
-                            max_tokens=1000
-                        )
-                        
-                        # Get the response
-                        chatgpt_response = response.choices[0].message.content
+                        # Handle both API versions
+                        if use_new_api:
+                            # New API (v1.0.0+)
+                            response = client.chat.completions.create(
+                                model=model,
+                                messages=[
+                                    {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
+                                    {"role": "user", "content": query}
+                                ],
+                                temperature=temperature,
+                                max_tokens=1000
+                            )
+                            chatgpt_response = response.choices[0].message.content
+                        else:
+                            # Old API (v0.28 and earlier)
+                            response = openai.ChatCompletion.create(
+                                model=model,
+                                messages=[
+                                    {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
+                                    {"role": "user", "content": query}
+                                ],
+                                temperature=temperature,
+                                max_tokens=1000
+                            )
+                            chatgpt_response = response.choices[0].message.content
                         
                         # Store in session state
                         st.session_state.chatgpt_response = chatgpt_response
