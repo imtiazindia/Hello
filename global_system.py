@@ -1,6 +1,7 @@
 # global_system.py
 import streamlit as st
-from openai import OpenAI  # Only import what we need
+import httpx
+from openai import OpenAI
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
@@ -40,9 +41,14 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # Initialize OpenAI client with explicit API key
-                        # This avoids Streamlit's automatic proxy injection
-                        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                        # Create custom HTTP client to bypass Streamlit's proxy injection
+                        http_client = httpx.Client()
+                        
+                        # Initialize OpenAI client with explicit HTTP client
+                        client = OpenAI(
+                            api_key=st.secrets["OPENAI_API_KEY"],
+                            http_client=http_client
+                        )
                         
                         response = client.chat.completions.create(
                             model=model,
@@ -58,6 +64,9 @@ def ask_global_system():
                         # Store in session state
                         st.session_state.chatgpt_response = chatgpt_response
                         st.session_state.last_query = query
+                        
+                        # Close the HTTP client
+                        http_client.close()
                         
                     except Exception as e:
                         error_msg = str(e)
