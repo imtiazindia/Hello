@@ -44,24 +44,26 @@ def ask_global_system():
     
     with col1:
         if st.button("Submit Query", type="primary"):
-            if not query:
-                st.warning("Please enter a query first.")
-            else:
-                # Display loading state
-                with st.spinner("ChatGPT is thinking..."):
-                    try:
-                        # Debug: Show the API key prefix (remove in production)
-                        api_key_prefix = st.secrets["OPENAI_API_KEY"][:10] + "..."
-                        st.sidebar.info(f"Using API key: {api_key_prefix}")
-                        
-                        # Create custom HTTP client to bypass Streamlit's proxy injection
-                        http_client = httpx.Client()
-                        
-                        # Initialize OpenAI client with explicit HTTP client
-                        client = OpenAI(
-                            api_key=st.secrets["OPENAI_API_KEY"],
-                            http_client=http_client
-                        )
+    if not query:
+        st.warning("Please enter a query first.")
+    else:
+        with st.spinner("ChatGPT is thinking..."):
+            try:
+                # Create HTTP client and OpenAI client
+                http_client = httpx.Client()
+                client = OpenAI(
+                    api_key=st.secrets["OPENAI_API_KEY"],
+                    http_client=http_client
+                )
+                
+                # Test with a very simple call first
+                response = client.chat.completions.create(
+                    model="gpt-3.5-turbo",  # Use most reliable model
+                    messages=[
+                        {"role": "user", "content": "Hello"}  # Simple test message
+                    ],
+                    max_tokens=10
+                )
                         
                         # Test with a simple call first
                         response = client.chat.completions.create(
