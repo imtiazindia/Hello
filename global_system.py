@@ -7,14 +7,14 @@ def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Debug: Check if secret exists
-    if "OPENAI_API_KEY" not in st.secrets:
-        st.error("OPENAI_API_KEY not found in secrets. Please check your secrets.toml file.")
-        st.info("Make sure your secrets.toml has: OPENAI_API_KEY = 'your-key-here'")
+    # Debug: Check secret access
+    try:
+        key = st.secrets["OPENAI_API_KEY"]
+        st.sidebar.success(f"✅ API key found: {key[:12]}...")
+    except:
+        st.sidebar.error("❌ OPENAI_API_KEY not found in secrets")
+        st.error("Please add OPENAI_API_KEY to your Streamlit Cloud secrets")
         return
-    
-    # Debug: Show that we can access the secret (remove this in production)
-    st.sidebar.info("API key detected in secrets")
     
     # Query input
     query = st.text_area(
@@ -26,7 +26,7 @@ def ask_global_system():
     # Model selection
     model = st.selectbox(
         "Select AI model:",
-        ["gpt-3.5-turbo"],
+        ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
         help="Choose which ChatGPT model to use"
     )
     
@@ -44,38 +44,31 @@ def ask_global_system():
     
     with col1:
         if st.button("Submit Query", type="primary"):
-    if not query:
-        st.warning("Please enter a query first.")
-    else:
-        with st.spinner("ChatGPT is thinking..."):
-            try:
-                # Create HTTP client and OpenAI client
-                http_client = httpx.Client()
-                client = OpenAI(
-                    api_key=st.secrets["OPENAI_API_KEY"],
-                    http_client=http_client
-                )
-                
-                # Test with a very simple call first
-                response = client.chat.completions.create(
-                    model="gpt-3.5-turbo",  # Use most reliable model
-                    messages=[
-                        {"role": "user", "content": "Hello"}  # Simple test message
-                    ],
-                    max_tokens=10
-                )
+            if not query:
+                st.warning("Please enter a query first.")
+            else:
+                # Display loading state
+                with st.spinner("ChatGPT is thinking..."):
+                    try:
+                        # Create custom HTTP client to bypass Streamlit's proxy injection
+                        http_client = httpx.Client()
                         
-                        # Test with a simple call first
-                        response = client.chat.completions.create(
-                            model=model,
-                            messages=[
-                                {"role": "user", "content": "Hello, are you working?"}
-                            ],
-                            temperature=temperature,
-                            max_tokens=50
+                        # Initialize OpenAI client with explicit HTTP client
+                        client = OpenAI(
+                            api_key=st.secrets["OPENAI_API_KEY"],
+                            http_client=http_client
                         )
                         
-                        # If above works, make the actual call
+                        # Test with a very simple call first
+                        response = client.chat.completions.create(
+                            model="gpt-3.5-turbo",  # Use most reliable model
+                            messages=[
+                                {"role": "user", "content": "Hello"}  # Simple test message
+                            ],
+                            max_tokens=10
+                        )
+                        
+                        # If simple test works, proceed with actual query
                         response = client.chat.completions.create(
                             model=model,
                             messages=[
@@ -96,15 +89,20 @@ def ask_global_system():
                         http_client.close()
                         
                     except Exception as e:
+                        # More specific error handling
                         error_msg = str(e)
-                        st.sidebar.error(f"Error type: {type(e).__name__}")
-                        
-                        if "authentication" in error_msg.lower() or "api key" in error_msg.lower() or "401" in error_msg:
-                            st.error("Invalid API key. Please check:")
-                            st.write("1. API key is correct in secrets.toml")
-                            st.write("2. API key starts with 'sk-'")
-                            st.write("3. API key has proper permissions")
-                            st.write("4. API key is not expired")
+                        if "401" in error_msg or "authentication" in error_msg.lower():
+                            st.error("""
+                            **Authentication Failed!**
+                            
+                            Please check:
+                            1. 🔑 API key is correct in Streamlit Cloud secrets
+                            2. 📋 Key is copied exactly (no extra spaces)
+                            3. ⏰ Key is not expired
+                            4. 🌐 You have API access in your OpenAI account
+                            
+                            **To fix:** Go to Streamlit Cloud → App Settings → Secrets → Update OPENAI_API_KEY
+                            """)
                         elif "rate limit" in error_msg.lower():
                             st.error("Rate limit exceeded. Please try again later.")
                         else:
