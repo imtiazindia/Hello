@@ -5,7 +5,7 @@ from importlib.metadata import version
 from openai import OpenAI
 
 #test code to check open AI API call
-client = OpenAI(api_key=st.secrets["openai_api_key"])  # Or hardcoded
+client = OpenAI(api_key=st.secrets["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"])  # Or hardcoded
 
 try:
     response = client.chat.completions.create(
