@@ -7,26 +7,6 @@ def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
-    # Check OpenAI version and handle accordingly
-    try:
-        openai_version = version('openai')
-        st.sidebar.info(f"OpenAI version: {openai_version}")
-        
-        # For newer versions (1.0.0+) - use a different initialization approach
-        if openai_version.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.')):
-            # Set API key directly in the openai module to avoid client initialization issues
-            openai.api_key = st.secrets["OPENAI_API_KEY"]
-            # We'll use the old API syntax but with the new package
-            use_new_api = False
-        # For older versions (0.28 and earlier)
-        else:
-            openai.api_key = st.secrets["OPENAI_API_KEY"]
-            use_new_api = False
-            
-    except Exception as e:
-        st.error(f"Failed to initialize OpenAI: {e}")
-        return
-    
     # Query input
     query = st.text_area(
         "Enter your question or prompt:",
@@ -61,10 +41,13 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # For OpenAI v1.3.0, we need to use a different approach
-                        # Create client inside the button click to avoid Streamlit interference
+                        # Create OpenAI client with minimal initialization
+                        # This avoids Streamlit's automatic proxy injection
                         from openai import OpenAI
-                        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                        
+                        # Create client with ONLY the API key, no other parameters
+                        client = OpenAI()
+                        client.api_key = st.secrets["OPENAI_API_KEY"]
                         
                         response = client.chat.completions.create(
                             model=model,
