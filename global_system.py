@@ -49,7 +49,7 @@ def ask_global_system():
                 with st.spinner("ChatGPT is thinking..."):
                     try:
                         # Call ChatGPT API using the old compatible method
-                        response = openai.ChatCompletion.create(
+                        response = client.ChatCompletion.create(
                             model=model,
                             messages=[
                                 {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
