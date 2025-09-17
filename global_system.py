@@ -3,7 +3,7 @@ import streamlit as st
 import openai
 import os
 from openai import OpenAI
-client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
@@ -11,7 +11,7 @@ def ask_global_system():
     
     # Set API key directly without client initialization
     try:
-        openai.api_key = st.secrets["OPENAI_API_KEY"]
+        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"]) 
     except Exception as e:
         st.error(f"Failed to set OpenAI API key: {e}")
         return
