@@ -1,8 +1,6 @@
 # global_system.py
 import streamlit as st
-import openai
-from importlib.metadata import version
-from openai import OpenAI
+from openai import OpenAI  # Only import what we need
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
@@ -42,13 +40,9 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # Create OpenAI client with minimal initialization
+                        # Initialize OpenAI client with explicit API key
                         # This avoids Streamlit's automatic proxy injection
-                        from openai import OpenAI
-                        
-                        # Create client with ONLY the API key, no other parameters
-                        client = OpenAI()
-                        client.api_key = st.secrets["OPENAI_API_KEY"]
+                        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
                         
                         response = client.chat.completions.create(
                             model=model,
