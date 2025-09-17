@@ -12,11 +12,12 @@ def ask_global_system():
         openai_version = version('openai')
         st.sidebar.info(f"OpenAI version: {openai_version}")
         
-        # For newer versions (1.0.0+)
+        # For newer versions (1.0.0+) - use a different initialization approach
         if openai_version.startswith(('1.', '2.', '3.', '4.', '5.', '6.', '7.', '8.', '9.')):
-            from openai import OpenAI
-            client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
-            use_new_api = True
+            # Set API key directly in the openai module to avoid client initialization issues
+            openai.api_key = st.secrets["OPENAI_API_KEY"]
+            # We'll use the old API syntax but with the new package
+            use_new_api = False
         # For older versions (0.28 and earlier)
         else:
             openai.api_key = st.secrets["OPENAI_API_KEY"]
@@ -60,31 +61,21 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
-                        # Handle both API versions
-                        if use_new_api:
-                            # New API (v1.0.0+)
-                            response = client.chat.completions.create(
-                                model=model,
-                                messages=[
-                                    {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
-                                    {"role": "user", "content": query}
-                                ],
-                                temperature=temperature,
-                                max_tokens=1000
-                            )
-                            chatgpt_response = response.choices[0].message.content
-                        else:
-                            # Old API (v0.28 and earlier)
-                            response = openai.ChatCompletion.create(
-                                model=model,
-                                messages=[
-                                    {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
-                                    {"role": "user", "content": query}
-                                ],
-                                temperature=temperature,
-                                max_tokens=1000
-                            )
-                            chatgpt_response = response.choices[0].message.content
+                        # For OpenAI v1.3.0, we need to use a different approach
+                        # Create client inside the button click to avoid Streamlit interference
+                        from openai import OpenAI
+                        client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+                        
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=[
+                                {"role": "system", "content": "You are a helpful assistant. Provide clear, concise, and accurate responses."},
+                                {"role": "user", "content": query}
+                            ],
+                            temperature=temperature,
+                            max_tokens=1000
+                        )
+                        chatgpt_response = response.choices[0].message.content
                         
                         # Store in session state
                         st.session_state.chatgpt_response = chatgpt_response
