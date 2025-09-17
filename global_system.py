@@ -2,6 +2,8 @@
 import streamlit as st
 import openai
 import os
+from openai import OpenAI
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
