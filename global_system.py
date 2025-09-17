@@ -4,21 +4,6 @@ import openai
 from importlib.metadata import version
 from openai import OpenAI
 
-#test code to check open AI API call
-client = OpenAI(api_key=st.secrets["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"])  # Or hardcoded
-
-try:
-    response = client.chat.completions.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user", "content": "Hello, who are you?"}
-        ]
-    )
-    st.write(response.choices[0].message.content)
-except Exception as e:
-    st.error(f"An error occurred: {e}")
-#test code ends here.
-
 def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
