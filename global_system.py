@@ -2,6 +2,22 @@
 import streamlit as st
 import openai
 from importlib.metadata import version
+from openai import OpenAI
+
+#test code to check open AI API call
+client = OpenAI(api_key=st.secrets["openai_api_key"])  # Or hardcoded
+
+try:
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=[
+            {"role": "user", "content": "Hello, who are you?"}
+        ]
+    )
+    st.write(response.choices[0].message.content)
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+#test code ends here.
 
 def ask_global_system():
     st.header("Ask the Global System 🌐")
