@@ -7,6 +7,15 @@ def ask_global_system():
     st.header("Ask the Global System 🌐")
     st.write("Query the ChatGPT AI model directly.")
     
+    # Debug: Check if secret exists
+    if "OPENAI_API_KEY" not in st.secrets:
+        st.error("OPENAI_API_KEY not found in secrets. Please check your secrets.toml file.")
+        st.info("Make sure your secrets.toml has: OPENAI_API_KEY = 'your-key-here'")
+        return
+    
+    # Debug: Show that we can access the secret (remove this in production)
+    st.sidebar.info("API key detected in secrets")
+    
     # Query input
     query = st.text_area(
         "Enter your question or prompt:",
@@ -17,7 +26,7 @@ def ask_global_system():
     # Model selection
     model = st.selectbox(
         "Select AI model:",
-        ["gpt-3.5-turbo", "gpt-4", "gpt-4-turbo"],
+        ["gpt-3.5-turbo"],
         help="Choose which ChatGPT model to use"
     )
     
@@ -41,6 +50,10 @@ def ask_global_system():
                 # Display loading state
                 with st.spinner("ChatGPT is thinking..."):
                     try:
+                        # Debug: Show the API key prefix (remove in production)
+                        api_key_prefix = st.secrets["OPENAI_API_KEY"][:10] + "..."
+                        st.sidebar.info(f"Using API key: {api_key_prefix}")
+                        
                         # Create custom HTTP client to bypass Streamlit's proxy injection
                         http_client = httpx.Client()
                         
@@ -50,6 +63,17 @@ def ask_global_system():
                             http_client=http_client
                         )
                         
+                        # Test with a simple call first
+                        response = client.chat.completions.create(
+                            model=model,
+                            messages=[
+                                {"role": "user", "content": "Hello, are you working?"}
+                            ],
+                            temperature=temperature,
+                            max_tokens=50
+                        )
+                        
+                        # If above works, make the actual call
                         response = client.chat.completions.create(
                             model=model,
                             messages=[
@@ -59,6 +83,7 @@ def ask_global_system():
                             temperature=temperature,
                             max_tokens=1000
                         )
+                        
                         chatgpt_response = response.choices[0].message.content
                         
                         # Store in session state
@@ -70,8 +95,14 @@ def ask_global_system():
                         
                     except Exception as e:
                         error_msg = str(e)
-                        if "authentication" in error_msg.lower() or "api key" in error_msg.lower():
-                            st.error("Invalid API key. Please check your OpenAI API key in secrets.")
+                        st.sidebar.error(f"Error type: {type(e).__name__}")
+                        
+                        if "authentication" in error_msg.lower() or "api key" in error_msg.lower() or "401" in error_msg:
+                            st.error("Invalid API key. Please check:")
+                            st.write("1. API key is correct in secrets.toml")
+                            st.write("2. API key starts with 'sk-'")
+                            st.write("3. API key has proper permissions")
+                            st.write("4. API key is not expired")
                         elif "rate limit" in error_msg.lower():
                             st.error("Rate limit exceeded. Please try again later.")
                         else:
